@@ -27,6 +27,7 @@ class AuthController extends Controller
             'email' => 'required',
             'password' => 'required',
             "passwordConfirm" => "required|same:password",
+            "role" => "required"
         ]);
 
         if ($validator->fails() || $request->password !== $request->passwordConfirm) {
@@ -43,10 +44,9 @@ class AuthController extends Controller
             'lastName' => $request->lastName,
             'telephone' => $request->telephone,
             'email' => $request->email,
-            'password' => Hash::make($request->password)
+            'password' => Hash::make($request->password),
+            'role' => $request->role
         ]);
-
-        $user->assignRole('user');
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
