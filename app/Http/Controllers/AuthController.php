@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
@@ -26,16 +25,11 @@ class AuthController extends Controller
             'telephone' => 'required',
             'email' => 'required',
             'password' => 'required',
-            "passwordConfirm" => "required|same:password",
             "role" => "required"
         ]);
 
-        if ($validator->fails() || $request->password !== $request->passwordConfirm) {
-            $errors = $validator->errors()->toArray();
-            if ($request->password !== $request->passwordConfirm) {
-                $errors['passwordConfirm'] = ['The passwords do not match'];
-            }
-            return response()->json(['errors' => $errors], 400);
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
         }
 
         $user = User::create([
@@ -51,7 +45,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()
-            ->json(['data' => $user, 'access_token']);
+            ->json(['data' => $user, 'access_token' => $token]);
     }
 
     public function login(Request $request)
