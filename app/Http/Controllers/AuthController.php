@@ -6,10 +6,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
+use Stripe\Stripe;
+use Stripe\Exception\CardException;
 
 class AuthController extends Controller
 {
+
     public function index()
     {
         $users = User::all();
@@ -25,7 +29,7 @@ class AuthController extends Controller
             'telephone' => 'required',
             'email' => 'required',
             'password' => 'required',
-            "role" => "required"
+            "role" => "required",
         ]);
 
         if ($validator->fails()) {
@@ -39,8 +43,14 @@ class AuthController extends Controller
             'telephone' => $request->telephone,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role
+            'role' => $request->role,
         ]);
+
+        $user->createAsStripeCustomer();
+
+        //event(new Registered($user));
+
+        $user = User::find($user->id);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -73,5 +83,59 @@ class AuthController extends Controller
         return [
             'message' => 'You have successfully logged out and the token was succesfully deleted'
         ];
+    }
+
+    public function settingsProfilePhotoUrl(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        $request->validate([
+            'profilePhotoUrl' => 'required'
+        ]);
+
+        $user->profilePhotoUrl = $request->input('profilePhotoUrl');
+
+        $user->save();
+
+        return response()->json(['data' => $user]);
+    }
+
+    public function settingsPersonalDetails(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        $request->validate([
+            'firstName' => 'required',
+            'lastName' => 'required',
+            'telephone' => 'required',
+        ]);
+
+        $user->firstName = $request->input('firstName');
+        $user->lastName = $request->input('lastName');
+        $user->telephone = $request->input('telephone');
+
+        $user->save();
+
+        return response()->json(['data' => $user]);
+    }
+
+    public function settingsPasswordUpdate(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required',
+        ]);
+
+        if (Hash::check($request->current_password, $user->password)) {
+            $user->update([
+                'password' => Hash::make($request->password),
+            ]);
+
+            return response()->json(['data' => $user], 200);
+        } else {
+            return response()->json(['message' => 'La contraseña actual no es válida'], 422);
+        }
     }
 }

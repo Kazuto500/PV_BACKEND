@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -41,6 +42,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rutas accesibles solo para el rol "user"
     Route::middleware('role:user')->group(function () {
-        // ... otras rutas y funciones específicas del user
+        Route::put('settingsProfilePhotoUrl/{id}', [AuthController::class, 'settingsProfilePhotoUrl']);
+        Route::put('settingsPersonalDetails/{id}', [AuthController::class, 'settingsPersonalDetails']);
+        Route::put('settingsPasswordUpdate/{id}', [AuthController::class, 'settingsPasswordUpdate']);
+
+        Route::prefix('payment-methods')->group(function () {
+            Route::get('/', [PaymentMethodController::class, 'index']);
+            Route::post('/', [PaymentMethodController::class, 'store']);
+        });
+        Route::prefix('subscribe')->group(function () {
+            Route::get('/', [SubscriptionController::class, 'index']);
+            Route::post('/', [SubscriptionController::class, 'store']);
+            Route::get('/cancel', [SubscriptionController::class, 'cancel']);
+        });
     });
 });

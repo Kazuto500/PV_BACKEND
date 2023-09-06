@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->string('profilePhotoUrl')->default('');
             $table->string('companyName');
             $table->string('firstName');
             $table->string('lastName');
@@ -21,6 +22,9 @@ return new class extends Migration
             $table->string('telephone');
             $table->string('password');
             $table->string('role');
+            $table->boolean('authenticationEnabled')->default(FALSE);
+            $table->boolean('emailNotificationsEnabled')->default(FALSE);
+            $table->timestamp('lastPasswordUpdate')->default(now());
             $table->rememberToken();
             $table->timestamps();
         });
