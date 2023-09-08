@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('role');
             $table->boolean('authenticationEnabled')->default(FALSE);
             $table->boolean('emailNotificationsEnabled')->default(FALSE);
-            $table->timestamp('lastPasswordUpdate')->default(now());
+            $table->timestamp('lastPasswordUpdate')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

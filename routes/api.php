@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\StripePaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -42,18 +44,27 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rutas accesibles solo para el rol "user"
     Route::middleware('role:user')->group(function () {
+        //Ruta para configurar la foto de perfil
         Route::put('settingsProfilePhotoUrl/{id}', [AuthController::class, 'settingsProfilePhotoUrl']);
+        //Ruta para configurar la informacion del usuario
         Route::put('settingsPersonalDetails/{id}', [AuthController::class, 'settingsPersonalDetails']);
+        //Ruta para configurar la contraseña
         Route::put('settingsPasswordUpdate/{id}', [AuthController::class, 'settingsPasswordUpdate']);
-
         Route::prefix('payment-methods')->group(function () {
+            // Ruta para mostrar el metodo de pago actual del usuario
             Route::get('/', [PaymentMethodController::class, 'index']);
-            Route::post('/', [PaymentMethodController::class, 'store']);
+            // Ruta para añadir un metodo de pago
+            Route::post('/', [PaymentMethodController::class, 'create']);
         });
-        Route::prefix('subscribe')->group(function () {
-            Route::get('/', [SubscriptionController::class, 'index']);
-            Route::post('/', [SubscriptionController::class, 'store']);
-            Route::get('/cancel', [SubscriptionController::class, 'cancel']);
+        Route::prefix('subscription')->group(function () {
+            // Ruta para mostrar el plan actual del usuario
+            Route::get('/', [SubscriptionController::class, 'show'])->name('subscription.show');
+            // Ruta para suscribirse a un nuevo plan
+            Route::post('/subscribe/{plan}', [SubscriptionController::class, 'subscribe'])->name('subscription.subscribe');
+            // Ruta para cambiar de plan
+            Route::put('/change-plan/{plan}', [SubscriptionController::class, 'changePlan'])->name('subscription.change-plan');
+            // Ruta para cancelar la suscripción
+            Route::delete('/unsubscribe', [SubscriptionController::class, 'unsubscribe'])->name('subscription.unsubscribe');
         });
     });
 });
