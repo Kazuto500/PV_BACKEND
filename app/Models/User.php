@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\VerifyEmailNotification;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Billable;
 
     /**
      * The attributes that are mass assignable.
@@ -18,9 +20,15 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'companyName',
+        'firstName',
+        'lastName',
+        'countryCode',
+        'dialCode',
+        'telephone',
         'email',
         'password',
+        'role'
     ];
 
     /**
@@ -39,7 +47,32 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'emailVerifiedAt' => 'boolean',
         'password' => 'hashed',
     ];
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new VerifyEmailNotification($this));
+    }
+
+    public function opdb()
+    {
+        return $this->hasMany(Opdb::class);
+    }
+
+    public function callRecord()
+    {
+        return $this->hasMany(CallRecord::class);
+    }
+
+    public function weeklyRecord()
+    {
+        return $this->hasMany(WeeklyRecord::class);
+    }
+
+    public function campaign()
+    {
+        return $this->hasMany(Campaign::class);
+    }
 }
