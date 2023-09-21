@@ -45,11 +45,13 @@ Route::middleware('auth:sanctum')->group(function () {
         //Ruta para configurar la contraseña
         Route::put('settingsPasswordUpdate', [AuthController::class, 'settingsPasswordUpdate']);
         //Ruta para generar el codigo de seis digitos para la autenticacion en dos pasos
-        Route::post('generateTwoFactorCode/{id}', [AuthController::class, 'generateTwoFactorCode']);
+        Route::post('generateTwoFactorCode', [AuthController::class, 'generateTwoFactorCode']);
         //Ruta para ingresar el codigo y completar la autenticacion en dos pasos
-        Route::post('enableTwoFactorAuthentication/{id}', [AuthController::class, 'enableTwoFactorAuthentication']);
+        Route::post('enableTwoFactorAuthentication/', [AuthController::class, 'enableTwoFactorAuthentication']);
         //Ruta para la verificacion del email
-        Route::post('verifyEmail/{id}', [AuthController::class, 'verifyEmail']);
+        Route::prefix('web')->group(function () {
+            Route::post('verifyEmail', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+        });
         //Base de datos para uso del rol asistente
         Route::prefix('opdbs')->group(function () {
             //Ruta para mostrar los documentos para el rol asistente

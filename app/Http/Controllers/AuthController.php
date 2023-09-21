@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\TwoFactorCodeNotification;
-use App\Notifications\VerifyEmailNotification;
+use App\Mail\VerifyEmail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -56,7 +56,7 @@ class AuthController extends Controller
 
         $user->createAsStripeCustomer();
 
-        $user->sendEmailVerificationNotification();
+        // Mail::to($user->email)->send(new VerifyEmail($user));
 
         $user = User::find($user->id);
 
@@ -137,7 +137,7 @@ class AuthController extends Controller
                 'telephone' => $request->input('telephone'),
             ]);
 
-        $user = Auth::user();
+        $user = User::find($user->id);
 
         return response()->json(['data' => $user]);
     }
@@ -147,11 +147,11 @@ class AuthController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'current_password' => 'required',
+            'currentPassword' => 'required',
             'password' => 'required',
         ]);
 
-        if (Hash::check($request->current_password, $user->password)) {
+        if (Hash::check($request->currentPassword, $user->password)) {
             // Actualiza la contraseña en la base de datos
             DB::table('users')
                 ->where('id', $user->id)
@@ -199,13 +199,13 @@ class AuthController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'verification_code' => 'required|digits:6',
+            'verificationCode' => 'required',
         ]);
 
         // Verificar si el código proporcionado coincide con el código almacenado en la base de datos
         $authenticationCode = DB::table('users')->where('id', $user->id)->value('authenticationCode');
 
-        if (!password_verify($request->verification_code, $authenticationCode)) {
+        if (!password_verify($request->verificatioCode, $authenticationCode)) {
             return response()->json(['message' => 'El código de verificación es incorrecto.'], 400);
         }
 
@@ -221,10 +221,12 @@ class AuthController extends Controller
     {
         $user = Auth::user();
 
-        // Actualizar el campo email_verified a true
-        DB::table('users')->where('id', $user->id)->update(['email_verified' => true]);
+        if (!$user) {
+            return response()->json(['message' => 'Usuario no encontrado'], 404);
+        }
 
-        // Devolver una respuesta JSON de éxito
-        return response()->json(['message' => 'Correo electrónico verificado con éxito'], 200);
+        DB::table('users')->where('id', $user->id)->update(['emailVerifiedAt' => now()]);
+
+        return response()->json(['message' => 'Correo electrónico verificado con éxito']);
     }
 }

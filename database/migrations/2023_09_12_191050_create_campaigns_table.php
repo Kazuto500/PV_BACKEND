@@ -14,8 +14,14 @@ return new class extends Migration
         Schema::create('campaigns', function (Blueprint $table) {
             $table->id();
             $table->string('campaignName');
-            $table->string('plan');
+            $table->timestamp('createDate');
+            $table->string('planName');
+            $table->string('minutesPlan');
+            $table->string('restoreMinutesPlan');
             $table->boolean('state')->default(false);
+            $table->foreignId('user_id')->constrained('users');
+            $table->string('realizeCalls');
+            $table->string('averageCalls');
             $table->string('preview');
             $table->string('download');
             $table->timestamps();
