@@ -35,7 +35,6 @@ class AuthController extends Controller
             'telephone' => 'required',
             'email' => 'required',
             'password' => 'required',
-            "role" => "required",
         ]);
 
         if ($validator->fails()) {
@@ -93,26 +92,25 @@ class AuthController extends Controller
         ];
     }
 
-    public function settingsProfilePhotoUrl(Request $request)
+
+    public function settingsProfilePhoto(Request $request)
     {
         $user = Auth::user();
+        $file = $request->file('profilePhoto');
 
-        $request->validate([
-            'profilePhotoUrl' => 'required'
-        ]);
+        if ($file) {
+            $filePath = $file->store('profilePhotos');
 
-        // Actualiza el campo 'profilePhotoUrl' en la base de datos
-        DB::table('users')
-            ->where('id', $user->id)
-            ->update([
-                'profilePhotoUrl' => $request->input('profilePhotoUrl'),
-            ]);
+            DB::table('users')
+                ->where('id', $user->id)
+                ->update(['profilePhoto' => $filePath]);
 
-        // Recupera el usuario actualizado
-        $user = Auth::user();
-
-        return response()->json(['data' => $user]);
+            return response()->json(['message' => 'Foto de perfil actualizada correctamente']);
+        } else {
+            return response()->json(['message' => 'No se ha proporcionado ninguna foto de perfil'], 400);
+        }
     }
+
 
 
     public function settingsPersonalDetails(Request $request)

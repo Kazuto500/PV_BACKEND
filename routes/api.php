@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\AdministrationController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ManagementController;
 use App\Http\Controllers\OpdbController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\SubscriptionController;
@@ -39,7 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rutas accesibles solo para el rol "user"
     Route::middleware('role:user')->group(function () {
         //Ruta para configurar la foto de perfil
-        Route::put('settingsProfilePhotoUrl', [AuthController::class, 'settingsProfilePhotoUrl']);
+        Route::put('settingsProfilePhoto', [AuthController::class, 'settingsProfilePhoto']);
         //Ruta para configurar la informacion del usuario
         Route::put('settingsPersonalDetails', [AuthController::class, 'settingsPersonalDetails']);
         //Ruta para configurar la contraseña
@@ -55,9 +57,9 @@ Route::middleware('auth:sanctum')->group(function () {
         //Base de datos para uso del rol asistente
         Route::prefix('opdbs')->group(function () {
             //Ruta para mostrar los documentos para el rol asistente
-            Route::get('/', [OpdbController::class, 'index']);
+            Route::get('/', [OpdbController::class, 'upload']);
             //Ruta para generar los documentos para el rol asistente
-            Route::post('/', [OpdbController::class, 'store']);
+            Route::post('/download/{id}', [OpdbController::class, 'download']);
         });
         //Metodos de pago
         Route::prefix('payment-methods')->group(function () {
@@ -78,12 +80,15 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/unsubscribe', [SubscriptionController::class, 'unsubscribe']);
         });
     });
-    // Rutas accesibles solo para el rol "assistant"
-    Route::middleware('role:assistant')->group(function () {
-        // ... otras rutas y funciones específicas del assistant
+    // Rutas accesibles solo para el rol "manager"
+    Route::middleware('role:manager')->group(function () {
+        Route::get('opsInfo', [ManagementController::class, 'opsInfo']);
     });
     // Rutas accesibles solo para el rol "admin"
     Route::middleware('role:admin')->group(function () {
-        // ... otras rutas y funciones específicas del admin
+        Route::get('agentInfo', [AdministrationController::class, 'agentInfo']);
+        Route::post('createCampaign', [AdministrationController::class, 'createCampaign']);
+        Route::put('updateCampaign', [AdministrationController::class, 'updateCampaign']);
+        Route::delete('deleteCampaign', [AdministrationController::class, 'deleteCampaign']);
     });
 });

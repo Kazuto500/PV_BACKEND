@@ -6,41 +6,58 @@ use App\Models\Opdb;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class OpdbController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function upload(Request $request)
     {
         $user = Auth::user(); // Obtener el usuario autenticado
-        $opdb = Opdb::where('user_id', $user->id)->get();
-        return response()->json(['data' => $opdb]);
+
+        $file = $request->file('file');
+
+        if ($file) {
+
+            $filePath = $file->store('uploads'); // Almacena el archivo en la carpeta 'uploads'
+
+            $newFile = new Opdb();
+            $newFile->opDataBase = $filePath; // Almacena la ruta/nombre del archivo
+            $newFile->scrip = $request->input('scrip');
+            $newFile->otherDocs = $request->input('otherDocs'); // Almacena la ruta/nombre del archivo
+            $newFile->brief = $request->input('brief');
+            $newFile->userId = $user->id;
+            $newFile->save();
+
+            return response()
+                ->json(['data' => $newFile]);
+        } else {
+            return response()->json(['message' => 'No se ha proporcionado ningún archivo'], 400);
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request, $id)
+    public function download($id)
     {
-        // Acceder al usuario autenticado
-        $user = User::find($id);
+        $file = Opdb::find($id);
 
-        // Crear una nueva instancia de Opdb
-        $newOpdb = new Opdb();
-        $newOpdb->opDataBase = $request->input('opDataBase');
-        $newOpdb->scrip = $request->input('scrip');
-        $newOpdb->otherDocs = $request->input('otherDocs');
-        $newOpdb->brief = $request->input('brief');
+        if ($file) {
+            $user = Auth::user();
+            if ($file->userId === $user->id) {
+                $filePath = $file->opDataBase; // Ruta o nombre del archivo almacenado
 
-        // Asignar el ID del usuario actual al campo user_id
-        $newOpdb->user_id = $user->id;
+                // Verifica si el archivo existe en el almacenamiento
+                if (Storage::exists($filePath)) {
+                    $fileContent = Storage::get($filePath);
 
-        // Guardar la nueva caja en la base de datos
-        $newOpdb->save();
-
-        return response()
-            ->json(['data' => $newOpdb]);
+                    // Devuelve el archivo como respuesta
+                    return response(['data' => $fileContent, 200]);
+                } else {
+                    return response()->json(['message' => 'El archivo no existe en el almacenamiento'], 404);
+                }
+            } else {
+                return response()->json(['message' => 'No tienes permiso para descargar este archivo'], 403);
+            }
+        } else {
+            return response()->json(['message' => 'Archivo no encontrado'], 404);
+        }
     }
 }

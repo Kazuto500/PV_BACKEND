@@ -20,6 +20,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $fillable = [
+        'profilePhoto',
         'companyName',
         'firstName',
         'lastName',
@@ -47,14 +48,9 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<string, string>
      */
     protected $casts = [
-        'emailVerifiedAt' => 'boolean',
+        'emailVerifiedAt' => 'datetime',
         'password' => 'hashed',
     ];
-
-    public function sendEmailVerificationNotification()
-    {
-        $this->notify(new VerifyEmailNotification($this));
-    }
 
     public function opdb()
     {
@@ -69,10 +65,5 @@ class User extends Authenticatable implements MustVerifyEmail
     public function weeklyRecord()
     {
         return $this->hasMany(WeeklyRecord::class);
-    }
-
-    public function campaign()
-    {
-        return $this->hasMany(Campaign::class);
     }
 }

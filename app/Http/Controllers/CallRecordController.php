@@ -4,14 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\CallRecord;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CallRecordController extends Controller
 {
-    public function callRecordInfo($user_id, $campaign_id)
+    public function callRecordInfo($user)
     {
-        $calls = CallRecord::where('user_id', $user_id)
-            ->where('campaign_id', $campaign_id)
-            ->get();
+        $user = Auth::user();
+
+        $calls = CallRecord::where('userId', $user->id)->get();
 
         return response()->json($calls);
     }

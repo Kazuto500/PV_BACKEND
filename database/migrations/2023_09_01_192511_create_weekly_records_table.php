@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('download');
             $table->string('weeklySatisfaction');
             $table->foreignId('user_id')->constrained('users');
-            //$table->foreignId('campaign_id')->constrained('campaigns');
             $table->timestamps();
         });
     }

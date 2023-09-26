@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('campaigns', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('userId')->constrained('users', 'id');
             $table->string('campaignName');
             $table->timestamp('createDate');
             $table->string('planName');
             $table->string('minutesPlan');
-            $table->string('restoreMinutesPlan');
+            $table->string('restoreMinutesPlan')->nullable();
             $table->boolean('state')->default(false);
-            $table->foreignId('user_id')->constrained('users');
-            $table->string('realizeCalls');
-            $table->string('averageCalls');
+            $table->string('realizeCalls')->nullable();
+            $table->string('averageCalls')->nullable();
             $table->string('preview');
             $table->string('download');
             $table->timestamps();
