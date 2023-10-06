@@ -9,13 +9,8 @@ class CallRecord extends Model
 {
     use HasFactory;
 
-    public function user()
+    public function agentForm()
     {
-        return $this->belongsTo(User::class);
-    }
-
-    public function campaign()
-    {
-        return $this->belongsTo(Campaign::class);
+        return $this->belongsTo(AgentForm::class);
     }
 }

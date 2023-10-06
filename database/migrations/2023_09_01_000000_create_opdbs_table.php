@@ -11,17 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('management', function (Blueprint $table) {
+        Schema::create('opdbs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('userId')->constrained('users', 'id');
-            $table->boolean('state');
-            $table->string('name');
-            $table->string('lastName');
-            $table->string('contactNumber');
-            $table->string('contactType');
+            $table->string('opDataBase');
+            $table->string('brief');
+            $table->string('otherDocs');
             $table->string('scrip');
-            $table->string('attachAudio');
-            $table->string('comments');
             $table->timestamps();
         });
     }
@@ -31,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('management');
+        Schema::dropIfExists('opdbs');
     }
 };

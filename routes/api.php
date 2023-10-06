@@ -2,10 +2,10 @@
 
 use App\Http\Controllers\AdministrationController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ManagementController;
 use App\Http\Controllers\OpdbController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Middleware\CheckRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -39,7 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // Rutas accesibles solo para el rol "user"
-    Route::middleware('role:user')->group(function () {
+    Route::middleware(CheckRole::class . ':user')->group(function () {
         //Ruta para configurar la foto de perfil
         Route::put('settingsProfilePhoto', [AuthController::class, 'settingsProfilePhoto']);
         //Ruta para configurar la informacion del usuario
@@ -49,18 +49,16 @@ Route::middleware('auth:sanctum')->group(function () {
         //Ruta para generar el codigo de seis digitos para la autenticacion en dos pasos
         Route::post('generateTwoFactorCode', [AuthController::class, 'generateTwoFactorCode']);
         //Ruta para ingresar el codigo y completar la autenticacion en dos pasos
-        Route::post('enableTwoFactorAuthentication/', [AuthController::class, 'enableTwoFactorAuthentication']);
+        Route::post('enableTwoFactorAuthentication', [AuthController::class, 'enableTwoFactorAuthentication']);
         //Ruta para la verificacion del email
         Route::prefix('web')->group(function () {
             Route::post('verifyEmail', [AuthController::class, 'verifyEmail'])->name('verification.verify');
         });
-        //Base de datos para uso del rol asistente
-        Route::prefix('opdbs')->group(function () {
-            //Ruta para mostrar los documentos para el rol asistente
-            Route::get('/', [OpdbController::class, 'upload']);
-            //Ruta para generar los documentos para el rol asistente
-            Route::post('/download/{id}', [OpdbController::class, 'download']);
-        });
+        //Base de datos ingresada por el usuario
+        Route::post('updateOpDataBase', [OpdbController::class, 'updateOpDataBase']);
+        Route::post('updateBrief', [OpdbController::class, 'updateBrief']);
+        Route::post('updateOtherDocs', [OpdbController::class, 'updateOtherDocs']);
+        Route::post('updateScrip', [OpdbController::class, 'updateScrip']);
         //Metodos de pago
         Route::prefix('payment-methods')->group(function () {
             // Ruta para mostrar el metodo de pago actual del usuario
@@ -80,15 +78,13 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/unsubscribe', [SubscriptionController::class, 'unsubscribe']);
         });
     });
-    // Rutas accesibles solo para el rol "manager"
-    Route::middleware('role:manager')->group(function () {
-        Route::get('opsInfo', [ManagementController::class, 'opsInfo']);
+    // Rutas accesibles solo para el rol "agent"
+    Route::middleware(CheckRole::class . ':agent')->group(function () {
+        // Tus rutas aquí
     });
     // Rutas accesibles solo para el rol "admin"
-    Route::middleware('role:admin')->group(function () {
+    Route::middleware(CheckRole::class . ':admin')->group(function () {
         Route::get('agentInfo', [AdministrationController::class, 'agentInfo']);
-        Route::post('createCampaign', [AdministrationController::class, 'createCampaign']);
-        Route::put('updateCampaign', [AdministrationController::class, 'updateCampaign']);
-        Route::delete('deleteCampaign', [AdministrationController::class, 'deleteCampaign']);
+        Route::post('registerAgent', [AdministrationController::class, 'registerAgent']);
     });
 });

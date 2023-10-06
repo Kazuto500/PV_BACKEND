@@ -30,6 +30,16 @@ return [
 
     'disks' => [
 
+        'ftp' => [
+            'driver'   => 'ftp',
+            'host'     => 'ftp.ivanpuertoparra.com',
+            'username' => 'web@powerverse.ai',
+            'password' => 'H0l@Mund0//2024',
+            'port' => 21,
+            'root'     => '/', // Ruta en el servidor FTP que quieres utilizar
+        ],
+
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),
@@ -39,7 +49,7 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
             'throw' => false,
         ],

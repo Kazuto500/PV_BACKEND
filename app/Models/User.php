@@ -52,18 +52,28 @@ class User extends Authenticatable implements MustVerifyEmail
         'password' => 'hashed',
     ];
 
+    public function campaign()
+    {
+        return $this->hasOne(Campaign::class);
+    }
+
     public function opdb()
     {
-        return $this->hasMany(Opdb::class);
+        return $this->hasOne(Opdb::class);
     }
 
-    public function callRecord()
+    public function agent()
     {
-        return $this->hasMany(CallRecord::class);
+        return $this->hasOne(Agent::class);
     }
 
-    public function weeklyRecord()
+    public function administration()
     {
-        return $this->hasMany(WeeklyRecord::class);
+        return $this->hasOne(Administration::class);
+    }
+
+    public function userInfo()
+    {
+        return $this->hasOne(UserInfo::class);
     }
 }

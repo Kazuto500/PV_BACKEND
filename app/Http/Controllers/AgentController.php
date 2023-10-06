@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Management;
+use App\Models\Agent;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class ManagementController extends Controller
+class AgentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -35,7 +35,7 @@ class ManagementController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Management $management)
+    public function show(Agent $agent)
     {
         //
     }
@@ -43,7 +43,7 @@ class ManagementController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Management $management)
+    public function edit(Agent $agent)
     {
         //
     }
@@ -51,7 +51,7 @@ class ManagementController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Management $management)
+    public function update(Request $request, Agent $agent)
     {
         //
     }
@@ -59,7 +59,7 @@ class ManagementController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Management $management)
+    public function destroy(Agent $agent)
     {
         //
     }

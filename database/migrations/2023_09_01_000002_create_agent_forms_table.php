@@ -11,11 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('administrations', function (Blueprint $table) {
+        Schema::create('agentForms', function (Blueprint $table) {
             $table->id();
             $table->foreignId('userId')->constrained('users', 'id');
-            $table->string('totalPlanMinCampaign');
-            $table->string('restorePlanMinCampaign');
+            $table->foreignId('agentId')->constrained('agents', 'id');
+            $table->string('userFirstName');
+            $table->string('userLastName');
+            $table->string('numberContact');
+            $table->string('contactType');
+            $table->string('callResult');
+            $table->string('audioFile');
+            $table->string('comments');
             $table->timestamps();
         });
     }
@@ -25,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('administrations');
+        Schema::dropIfExists('agent_forms');
     }
 };

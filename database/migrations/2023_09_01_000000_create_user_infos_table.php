@@ -11,15 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('managers', function (Blueprint $table) {
+        Schema::create('userInfos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('userId')->constrained('users', 'id');
-            $table->string('userName');
-            $table->boolean('state');
-            $table->string('activities');
-            $table->string('calls');
-            $table->string('callsAverage');
-            $table->string('role');
+            $table->string('companyName')->nullable();
+            $table->string('userFirstAndLastName');
+            $table->string('userEmail');
+            $table->string('activePlan')->nullable();
+            $table->string('activationDate')->nullable();
+            $table->string('cutDate')->nullable();
+            $table->string('timeLeft')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('managers');
+        Schema::dropIfExists('user_infos');
     }
 };

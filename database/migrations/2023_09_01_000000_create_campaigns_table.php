@@ -15,15 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('userId')->constrained('users', 'id');
             $table->string('campaignName');
-            $table->timestamp('createDate');
-            $table->string('planName');
-            $table->string('minutesPlan');
-            $table->string('restoreMinutesPlan')->nullable();
-            $table->boolean('state')->default(false);
-            $table->string('realizeCalls')->nullable();
-            $table->string('averageCalls')->nullable();
-            $table->string('preview');
-            $table->string('download');
+            $table->timestamp('createPlanDate');
+            $table->string('planName')->nullable();
+            $table->boolean('state');
             $table->timestamps();
         });
     }

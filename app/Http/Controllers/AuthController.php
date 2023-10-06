@@ -9,11 +9,13 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\TwoFactorCodeNotification;
 use App\Mail\VerifyEmail;
+use App\Models\Campaign;
+use App\Models\Opdb;
+use App\Models\UserInfo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-
-
 
 class AuthController extends Controller
 {
@@ -53,9 +55,34 @@ class AuthController extends Controller
             'role' => $request->role,
         ]);
 
+        $userInfo = new UserInfo([
+            'userId' => $user->id,
+            'companyName' => $request->companyName,
+            'userFirstAndLastName' => $request->firstName . ' ' . $request->lastName,
+            'userEmail' => $request->email,
+        ]);
+        $userInfo->save();
+
+        $opdb = new Opdb([
+            'userId' => $user->id,
+            'opDataBase' => '',
+            'scrip' => '',
+            'otherDocs' => '',
+            'brief' => ''
+        ]);
+        $opdb->save();
+
         $user->createAsStripeCustomer();
 
         // Mail::to($user->email)->send(new VerifyEmail($user));
+
+        $campaign = new Campaign();
+        $campaign->userId = $user->id;
+        $campaign->campaignName = $request->companyName;
+        $campaign->createPlanDate = now();
+        // $campaign->planName = 'Nombre del Plan';
+        $campaign->state = false;
+        $campaign->save();
 
         $user = User::find($user->id);
 
@@ -67,11 +94,18 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        $credentials = $request->only('email', 'password');
+
+        if (!Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         $user = User::where('email', $request['email'])->firstOrFail();
+
+        if (!$user->activo) {
+            Auth::logout();
+            return response()->json(['message' => 'Tu cuenta está desactivada. Contacta al administrador.'], 401);
+        }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -81,9 +115,10 @@ class AuthController extends Controller
         ]);
     }
 
+
     public function logout()
     {
-        auth()->user()->tokens->each(function ($token, $key) {
+        auth()->user()->tokens->each(function ($token) {
             $token->delete();
         });
 
@@ -92,14 +127,15 @@ class AuthController extends Controller
         ];
     }
 
-
     public function settingsProfilePhoto(Request $request)
     {
         $user = Auth::user();
         $file = $request->file('profilePhoto');
 
         if ($file) {
-            $filePath = $file->store('profilePhotos');
+            $ftpDisk = Storage::disk('ftp');
+            $filePath = 'profilePhotos/' . $user->id . '/' . $file->getClientOriginalName();
+            $ftpDisk->put($filePath, file_get_contents($file));
 
             DB::table('users')
                 ->where('id', $user->id)
@@ -110,8 +146,6 @@ class AuthController extends Controller
             return response()->json(['message' => 'No se ha proporcionado ninguna foto de perfil'], 400);
         }
     }
-
-
 
     public function settingsPersonalDetails(Request $request)
     {
@@ -150,14 +184,12 @@ class AuthController extends Controller
         ]);
 
         if (Hash::check($request->currentPassword, $user->password)) {
-            // Actualiza la contraseña en la base de datos
             DB::table('users')
                 ->where('id', $user->id)
                 ->update([
                     'password' => Hash::make($request->password),
                 ]);
 
-            // Recupera el usuario actualizado
             $user = Auth::user();
 
             return response()->json(['data' => $user], 200);
@@ -174,17 +206,14 @@ class AuthController extends Controller
             return response()->json(['message' => 'La autenticación de dos pasos no está habilitada para este usuario.'], 400);
         }
 
-        // Generar un código de autenticación de 6 dígitos
         $code = Str::random(6);
 
-        // Almacena el código en la base de datos del usuario usando Hash
         DB::table('users')
             ->where('id', $user->id)
             ->update([
                 'authenticationCode' => Hash::make($code),
             ]);
 
-        // Envía la notificación al usuario por correo electrónico
         Mail::to($user->email)->send(new TwoFactorCodeNotification($code));
 
 
@@ -200,14 +229,12 @@ class AuthController extends Controller
             'verificationCode' => 'required',
         ]);
 
-        // Verificar si el código proporcionado coincide con el código almacenado en la base de datos
         $authenticationCode = DB::table('users')->where('id', $user->id)->value('authenticationCode');
 
         if (!password_verify($request->verificatioCode, $authenticationCode)) {
             return response()->json(['message' => 'El código de verificación es incorrecto.'], 400);
         }
 
-        // Habilitar la autenticación de dos pasos (establecer el campo como verdadero)
         DB::table('users')->where('id', $user->id)->update(['authenticationEnabled' => true]);
 
         $user = Auth::user();
