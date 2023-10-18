@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('agentForms', function (Blueprint $table) {
+        Schema::create('agent_forms', function (Blueprint $table) {
             $table->id();
             $table->foreignId('userId')->constrained('users', 'id');
             $table->foreignId('agentId')->constrained('agents', 'id');

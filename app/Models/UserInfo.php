@@ -9,6 +9,13 @@ class UserInfo extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'userId',
+        'companyName',
+        'userFirstAndLastName',
+        'userEmail'
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

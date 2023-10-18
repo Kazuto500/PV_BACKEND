@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('callRecords', function (Blueprint $table) {
+        Schema::create('call_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('agentFormId')->constrained('agentForms');
+            $table->foreignId('agentFormId')->constrained('agent_forms');
             $table->string('clientName');
             $table->string('recordingDate');
             $table->string('recordingTime');
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('callRecords');
+        Schema::dropIfExists('call_records');
     }
 };

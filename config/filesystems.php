@@ -36,7 +36,7 @@ return [
             'username' => 'web@powerverse.ai',
             'password' => 'H0l@Mund0//2024',
             'port' => 21,
-            'root'     => '/', // Ruta en el servidor FTP que quieres utilizar
+            'root'     => '/storage', // Ruta en el servidor FTP que quieres utilizar
         ],
 
 

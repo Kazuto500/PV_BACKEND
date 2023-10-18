@@ -9,6 +9,14 @@ class Opdb extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'userId',
+        'opDataBase',
+        'scrip',
+        'otherDocs',
+        'brief'
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
